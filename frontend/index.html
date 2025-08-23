@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educational Article Generator</title>
+
+    <!-- CSS styles embedded directly in the HTML file -->
+    <style>
+        /* Define the color palette */
+        :root {
+            --light-orange: #ffcc99;
+            --light-blue: #a3d9ff;
+            --light-green: #c3ffb0;
+            --light-yellow: #fff3a6;
+            --dark-gray: #333;
+            --medium-gray: #777;
+            --white: #fff;
+            --error-red: #dc3545;
+            --success-green: #28a745;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-yellow);
+            color: var(--dark-gray);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--white);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            max-width: 800px;
+            width: 100%;
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--dark-gray);
+            font-size: 2.5em;
+            margin-bottom: 0.5em;
+        }
+        
+        p {
+            text-align: center;
+            color: var(--medium-gray);
+            margin-bottom: 2em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--dark-gray);
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: var(--light-blue);
+            outline: none;
+        }
+
+        #generate-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--light-orange);
+            color: var(--dark-gray);
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+
+        #generate-btn:hover {
+            background-color: #ffb366;
+            transform: translateY(-2px);
+        }
+
+        #generate-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #status-message {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        
+        .status-loading {
+            color: var(--dark-gray);
+            background-color: var(--light-yellow);
+        }
+        
+        .status-error {
+            color: var(--white);
+            background-color: var(--error-red);
+        }
+        
+        #article-output {
+            margin-top: 30px;
+            border-top: 2px solid var(--light-blue);
+            padding-top: 20px;
+        }
+        
+        #article-output pre {
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        #article-content {
+            white-space: pre-wrap;
+            line-height: 1.8;
+        }
+
+        #download-options {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+
+        .download-btn {
+            padding: 10px 20px;
+            background-color: var(--light-green);
+            color: var(--dark-gray);
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-left: 15px;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+
+        .download-btn:hover {
+            background-color: #99ff7a;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Educational Article Generator 📝</h1>
+        <p>Enter a topic and generate a structured educational article instantly.</p>
+
+        <!-- The form for user input -->
+        <form id="article-form">
+            <div class="form-group">
+                <label for="topic">Topic:</label>
+                <input type="text" id="topic" name="topic" placeholder="e.g., The Basics of Machine Learning" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="difficulty">Difficulty:</label>
+                <select id="difficulty" name="difficulty">
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate" selected>Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="audience">Audience:</label>
+                <select id="audience" name="audience">
+                    <option value="students" selected>Students</option>
+                    <option value="professionals">Professionals</option>
+                    <option value="general public">General Public</option>
+                </select>
+            </div>
+
+            <button type="submit" id="generate-btn">Generate Article</button>
+        </form>
+
+        <!-- Status and article output sections -->
+        <div id="status-message" class="hidden"></div>
+        <div id="article-output" class="hidden">
+            <div id="download-options" class="hidden">
+                <a href="#" id="download-docx" class="download-btn">Download DOCX</a>
+            </div>
+            <div id="article-content"></div>
+        </div>
+    </div>
+
+    <!-- External library for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- JavaScript logic embedded directly -->
+    <script>
+        // Get references to all the HTML elements we need to interact with
+        const form = document.getElementById('article-form');
+        const topicInput = document.getElementById('topic');
+        const difficultySelect = document.getElementById('difficulty');
+        const audienceSelect = document.getElementById('audience');
+        const generateBtn = document.getElementById('generate-btn');
+        const statusMessage = document.getElementById('status-message');
+        const articleOutput = document.getElementById('article-output');
+        const articleContent = document.getElementById('article-content');
+        const downloadOptions = document.getElementById('download-options');
+        const downloadDocxBtn = document.getElementById('download-docx');
+
+        // The base URL for the backend API.
+        const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+
+        // Add an event listener for the form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent the default form submission behavior (page reload)
+
+            // Show a loading state to the user
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'Generating...';
+            statusMessage.textContent = 'Generating article... this may take a moment.';
+            statusMessage.classList.add('status-loading');
+            statusMessage.classList.remove('status-error', 'hidden');
+            articleOutput.classList.add('hidden');
+            downloadOptions.classList.add('hidden');
+
+            const topic = topicInput.value;
+            const difficulty = difficultySelect.value;
+            const audience = audienceSelect.value;
+
+            try {
+                // Send a POST request to the backend API to generate the article
+                const response = await fetch(`${API_BASE_URL}/generate_article`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ topic, difficulty, audience }),
+                });
+
+                // Check if the response was successful
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Failed to generate article.');
+                }
+
+                // Parse the JSON response
+                const data = await response.json();
+                const articleId = data.article_id;
+                const articleText = data.article_content;
+
+                // Use marked.js to convert the Markdown content into HTML
+                articleContent.innerHTML = marked.parse(articleText);
+                
+                // Show the article and hide the status message
+                articleOutput.classList.remove('hidden');
+                downloadOptions.classList.remove('hidden');
+                statusMessage.classList.add('hidden');
+
+                // Update the download link URL with the new article ID
+                downloadDocxBtn.href = `${API_BASE_URL}/download_article/${articleId}?format=docx`;
+
+            } catch (error) {
+                // Display any errors that occur during the process
+                statusMessage.textContent = `Error: ${error.message}`;
+                statusMessage.style.color = 'white';
+                statusMessage.classList.add('status-error');
+                statusMessage.classList.remove('hidden', 'status-loading');
+                console.error('Error:', error);
+            } finally {
+                // Reset the button to its original state
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Generate Article';
+            }
+        });
+    </script>
+</body>
+</html>
